@@ -1,7 +1,7 @@
 // Descrição: Configuração do servidor express
 // O arquivo app.js é responsável por configurar o servidor express e adicionar os middlewares e rotas.
-const express = require('express');
-const routes = require('./routes');
+import express  from 'express';
+import routes  from './routes';
 
 // Cria a classe App
 // Essa classe é responsável por configurar o servidor express
@@ -22,4 +22,4 @@ class App {
     }
 }
 
-module.exports = new App().server;
+export default new App().server;

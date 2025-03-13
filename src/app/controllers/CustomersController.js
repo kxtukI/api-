@@ -76,4 +76,4 @@ class CustomersController {
 }
 
 // Exporta uma instância da classe CustomersController
-module.exports = new CustomersController();
+export default new CustomersController();
