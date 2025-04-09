@@ -1,24 +1,20 @@
-// Importa o array de clientes
-// Esse array será usado para simular um banco de dados
-let customers = [
-    { id: 1, name: "Dev Samurai", site: "https://devsamurai.com.br"},
-    { id: 2, name: "Google", site: "https://google.com"},
-    { id: 3, name: "UOL", site: "https://uol.com.br"}    
-];
-
-
+import Customer from '../models/Customer.js';
+ 
 class CustomersController {
     // Rotas
-    index(req, res) {
+    async index(req, res) {
         // Retorna a lista de clientes
-        return res.json(customers);
+        const data = await Customer.findAll({
+            limit: 1000,
+        });
+        return res.json(data);
     }
 
     // Rota para buscar um cliente pelo id
-    show(req, res) {
+    async show(req, res) {
         const id = parseInt(req.params.id);
         // Busca o cliente pelo id
-        const customer = customers.find(item => item.id === id);
+        const customer = await Customer.findByPk(id);
         //  Verifica se o cliente foi encontrado
         const status = customer ? 200 : 404;
     
@@ -27,48 +23,44 @@ class CustomersController {
     }
 
     // Rota para criar um novo cliente
-    create(req, res) {
+    async create(req, res) {
         // Pega os dados do corpo da requisição
-        const {name, site} = req.body;
-        // Gera um novo id para o cliente
-        const id = customers[customers.length - 1].id + 1;
-
-        const newCustomer = { id, name, site};
-        // Adiciona o novo cliente ao array
-        customers.push(newCustomer);
+        const { name, email } = req.body;
+        // Cria um novo cliente
+        const newCustomer = await Customer.create({ name, email });
 
         // Retorna o novo cliente criado
         return res.status(201).json(newCustomer);
     }
 
     // Rota para atualizar um cliente
-    update(req, res) {
+    async update(req, res) {
         // Pega o id do cliente a ser atualizado
         const id = parseInt(req.params.id);
-        const {name, site} = req.body;
+        const { name, email } = req.body;
 
-        const index = customers.findIndex(item => item.id === id);
-        const status = index >= 0 ? 200 : 404;
+        const customer = await Customer.findByPk(id);
+        const status = customer ? 200 : 404;
 
-        // Verifica se o cliente foi encontrado
-        if(index >= 0){
+        // Verifica se o cliente    foi encontrado
+        if (customer) {
             // Atualiza os dados do cliente
-            customers[index] = { id: parseInt(id), name, site};
+            await customer.update({ name, email });
         }
 
-        return res.status(status).json(customers[index]);
+        return res.status(status).json(customer);
     }
 
     // Rota para deletar um cliente
-    destroy(req, res) {
+    async destroy(req, res) {
         const id = parseInt(req.params.id);
 
-        const index = customers.findIndex(item => item.id === id);
-        const status = index >= 0 ? 200 : 404;
+        const customer = await Customer.findByPk(id);
+        const status = customer ? 200 : 404;
 
-        if(index >= 0){
-            // Remove o cliente do array
-            customers.splice(index, 1);
+        if (customer) {
+            // Remove o cliente do banco de dados
+            await customer.destroy();
         }
 
         return res.status(status).json();

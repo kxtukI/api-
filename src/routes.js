@@ -2,7 +2,7 @@
 // O arquivo routes.js é responsável por configurar as rotas da aplicação.
 import { Router } from 'express';
 // Importa o controller CustomersController
-import customers from './app/controllers/CustomersController';
+import customers from './app/controllers/CustomersController.js';
 
 const routes = new Router();
 
