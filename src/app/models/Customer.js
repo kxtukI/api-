@@ -28,6 +28,11 @@ Customer.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM('ACTIVE', 'ARCHIVED'),
+      allowNull: false,
+      defaultValue: 'ACTIVE',
+    }
   },
   {
     sequelize,
