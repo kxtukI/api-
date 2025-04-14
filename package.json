@@ -17,7 +17,8 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "sequelize": "^6.37.6",
-    "sucrase": "^3.35.0"
+    "sucrase": "^3.35.0",
+    "yup": "^1.6.1"
   },
   "scripts": {
     "dev": "nodemon ./src/server.js"
