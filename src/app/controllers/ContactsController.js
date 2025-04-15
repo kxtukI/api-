@@ -1,11 +1,12 @@
-import Customer from '../models/Customer.js';
 import Contact from '../models/Contact.js';
+import Customer from '../models/Customer.js';
+
 import { Op } from 'sequelize';
-import { parseISO } from 'date-fns'
+import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
 
-class CustomersController {
-    // Rotas
+class ContactController {
+
     async index(req, res) {
         const {
             name,
@@ -21,7 +22,7 @@ class CustomersController {
         const page = req.query.page || 1;
         const limit = req.query.limit || 25;
 
-        let where = {};
+        let where = { customer_id: req.params.customer_id };
 
         let order = [];
 
@@ -93,42 +94,37 @@ class CustomersController {
         }
 
         console.log(where);
-
-        const data = await Customer.findAll({
+        const contact = await Contact.findAll({
             where,
             include: [
                 {
-                    model: Contact,
-                    attributes: ["id", "status"],
+                    model: Customer,
+                    attributes: ["id", "status"]
                 }
             ],
             order,
             limit,
-            offset: limit * page - limit,
-        });
+            offset: limit * page - limit
+        })
         return res.json(contact);
     }
 
-    // Rota para buscar um cliente pelo id
     async show(req, res) {
-        const id = parseInt(req.params.id);
-        // Busca o cliente pelo id
-        const customer = await Customer.findByPk(id);
+        const contact = await Contact.findByPk(req.params.id)
 
-        if (!customer) {
+        if (!contact) {
             return res.status(404).json();
         }
-        return res.json(customer);
+
+        return res.json(contact);
     }
 
-    // Rota para criar um novo cliente
     async create(req, res) {
-        // Pega os dados do corpo da requisição
-        // Cria um novo cliente
         const schema = Yup.object().shape({
             name: Yup.string().required(),
-            email: Yup.string().email().required(),
-            status: Yup.string().uppercase()
+            email: Yup.string().required(),
+            status: Yup.string().uppercase(),
+            customer_id: Yup.number().positive().integer().required(),
         })
 
         schema.isValid(req.body);
@@ -137,20 +133,17 @@ class CustomersController {
             return res.status(400).json({ error: "error on validate schema" });
         }
 
-        const customer = await Customer.create(req.body);
+        const contact = await Contact.create(req.body);
 
-        // Retorna o novo cliente criado
-        return res.json(customer);
+        return res.json(contact);
     }
 
-    // Rota para atualizar um cliente
     async update(req, res) {
-        // Pega os dados do corpo da requisição
-        // Cria um novo cliente
         const schema = Yup.object().shape({
             name: Yup.string(),
-            email: Yup.string().email(),
-            status: Yup.string().uppercase()
+            email: Yup.string(),
+            status: Yup.string().uppercase(),
+            customer_id: Yup.number().positive().integer(),
         })
 
         schema.isValid(req.body);
@@ -159,29 +152,29 @@ class CustomersController {
             return res.status(400).json({ error: "error on validate schema" });
         }
 
-        const customer = await Customer.findByPk(req.params.id);
+        const contact = await Contact.findByPk(req.params.id)
 
-        if (!customer) {
+        if (!contact) {
             return res.status(404).json();
         }
-        await customer.update(req.body);
 
-        // Retorna o cliente alterado
-        return res.json(customer);
+        await contact.update(req.body);
+
+        return res.json(contact);
     }
 
-    // Rota para deletar um cliente
     async destroy(req, res) {
 
-        const customer = await Customer.findByPk(req.params.id);
-        if (!customer) {
-            // Remove o cliente do banco de dados
+        const contact = await Contact.findByPk(req.params.id)
+
+        if (!contact) {
             return res.status(404).json();
         }
-        await customer.destroy();
+
+        await contact.destroy();
         return res.json();
     }
+
 }
 
-// Exporta uma instância da classe CustomersController
-export default new CustomersController();
+export default new ContactController();
