@@ -22,7 +22,7 @@ class ContactController {
         const page = req.query.page || 1;
         const limit = req.query.limit || 25;
 
-        let where = { customer_id: req.params.customer_id };
+        let where = { customer_id: req.params.customerId };
 
         let order = [];
 
@@ -110,7 +110,15 @@ class ContactController {
     }
 
     async show(req, res) {
-        const contact = await Contact.findByPk(req.params.id)
+
+
+        const contact = await Contact.findOne({
+            where: {
+                customer_id: req.params.customerId,
+                id: req.params.id
+            },
+            attributes: { exclude: ["customer_id"] }
+        })
 
         if (!contact) {
             return res.status(404).json();
@@ -124,7 +132,6 @@ class ContactController {
             name: Yup.string().required(),
             email: Yup.string().required(),
             status: Yup.string().uppercase(),
-            customer_id: Yup.number().positive().integer().required(),
         })
 
         schema.isValid(req.body);
@@ -133,7 +140,20 @@ class ContactController {
             return res.status(400).json({ error: "error on validate schema" });
         }
 
-        const contact = await Contact.create(req.body);
+        const contact = await Contact.findOne({
+            where: {
+                customer_id: req.params.customerId
+            }
+        })
+
+        if (!contact) {
+            res.status(404).json();
+        }
+
+        await Contact.create({
+            customer_id: req.params.customerId,
+            ...req.body
+        })
 
         return res.json(contact);
     }
@@ -143,7 +163,6 @@ class ContactController {
             name: Yup.string(),
             email: Yup.string(),
             status: Yup.string().uppercase(),
-            customer_id: Yup.number().positive().integer(),
         })
 
         schema.isValid(req.body);
@@ -152,7 +171,12 @@ class ContactController {
             return res.status(400).json({ error: "error on validate schema" });
         }
 
-        const contact = await Contact.findByPk(req.params.id)
+        const contact = await Contact.findOne({
+            where: {
+                customer_id: req.params.customerId,
+                id: req.params.id
+            }
+        })
 
         if (!contact) {
             return res.status(404).json();
@@ -165,13 +189,19 @@ class ContactController {
 
     async destroy(req, res) {
 
-        const contact = await Contact.findByPk(req.params.id)
+        const contact = await Contact.findOne({
+            where: {
+                customer_id: req.params.customerId,
+                id: req.params.id
+            }
+        })
 
         if (!contact) {
             return res.status(404).json();
         }
 
-        await contact.destroy();
+        await contact.destroy(req.body);
+
         return res.json();
     }
 

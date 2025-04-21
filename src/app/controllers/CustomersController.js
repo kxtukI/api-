@@ -106,7 +106,7 @@ class CustomersController {
             limit,
             offset: limit * page - limit,
         });
-        return res.json(contact);
+        return res.json(data);
     }
 
     // Rota para buscar um cliente pelo id
