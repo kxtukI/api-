@@ -1,4 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
+import bcrypt from 'bcryptjs';
 
 class User extends Model {
     static init(sequelize) {
@@ -19,6 +20,13 @@ class User extends Model {
                     allowNull: false,
                     unique: true
                 },
+                password: {
+                    type: DataTypes.VIRTUAL,
+                    allowNull: true,
+                    set(value) {
+                        if (value) this.setDataValue('password', value);
+                    }
+                },
                 password_hash: {
                     type: DataTypes.STRING,
                     allowNull: false
@@ -30,17 +38,25 @@ class User extends Model {
                 updatedAt: {
                     type: DataTypes.DATE,
                     allowNull: false
-                },
+                }
             },
             {
                 sequelize,
                 modelName: 'User',
-                tableName: 'users', 
+                tableName: 'users',
+                hooks: {
+                    beforeValidate: async (user) => {
+                        if (user.password) {
+                            user.password_hash = await bcrypt.hash(user.password, 8);
+                        }
+                    }
+                }
             }
         );
     }
 
-    static associate(models) {
+    checkPassword(password) {
+        return bcrypt.compare(password, this.password_hash);
     }
 }
 

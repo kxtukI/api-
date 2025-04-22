@@ -1,9 +1,9 @@
-import Contact from '../models/Contact.js';
-import Customer from '../models/Customer.js';
-
 import { Op } from 'sequelize';
 import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
+
+import Contact from '../models/Contact.js';
+import Customer from '../models/Customer.js';
 
 class ContactController {
 

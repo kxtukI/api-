@@ -1,17 +1,14 @@
 import { Op } from 'sequelize';
-import { parseISO } from 'date-fns'
+import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
 
-import Customer from '../models/Customer.js';
-import Contact from '../models/Contact.js';
+import User from '../models/User.js';
 
-class CustomersController {
-    // Rotas
+class UsersController {
     async index(req, res) {
         const {
             name,
             email,
-            status,
             createdBefore,
             createdAfter,
             updatedBefore,
@@ -40,15 +37,6 @@ class CustomersController {
                 ...where,
                 email: {
                     [Op.like]: email,
-                }
-            }
-        }
-
-        if (status) {
-            where = {
-                ...where,
-                status: {
-                    [Op.in]: status.split(",").map(item => item.toUpperCase()),
                 }
             }
         }
@@ -93,16 +81,9 @@ class CustomersController {
             order = sort.split(",").map(item => item.split(":"));
         }
 
-        console.log(where);
-
-        const data = await Customer.findAll({
+        const data = await User.findAll({
+            attributes: { exclude: ['password', 'password_hash'] },
             where,
-            include: [
-                {
-                    model: Contact,
-                    attributes: ["id", "status"],
-                }
-            ],
             order,
             limit,
             offset: limit * page - limit,
@@ -110,79 +91,83 @@ class CustomersController {
         return res.json(data);
     }
 
-    // Rota para buscar um cliente pelo id
     async show(req, res) {
-        const id = parseInt(req.params.id);
-        // Busca o cliente pelo id
-        const customer = await Customer.findByPk(id);
+        const user = await User.findByPk(req.params.id, {
+            attributes: { exclude: ["password_hash"] },
+        });
 
-        if (!customer) {
+        if (!user) {
             return res.status(404).json();
         }
-        return res.json(customer);
+
+        return res.json(user);
     }
 
-    // Rota para criar um novo cliente
     async create(req, res) {
-        // Pega os dados do corpo da requisição
-        // Cria um novo cliente
         const schema = Yup.object().shape({
             name: Yup.string().required(),
             email: Yup.string().email().required(),
-            status: Yup.string().uppercase()
+            password: Yup.string().required().min(8),
+            passwordConfirmation: Yup.string().when("password", (password, field) =>
+                password ? field.required().oneOf([Yup.ref("password")]) : field
+            )
         })
 
-        schema.isValid(req.body);
-
         if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: "error on validate schema" });
+            return res.status(400).json({ error: "error on validate schema" })
         }
 
-        const customer = await Customer.create(req.body);
+        const { id, name, email, createdAt, updatedAt } = await User.create(req.body);
 
-        // Retorna o novo cliente criado
-        return res.json(customer);
+        return res.json({ id, name, email, createdAt, updatedAt });
     }
 
-    // Rota para atualizar um cliente
     async update(req, res) {
-        // Pega os dados do corpo da requisição
-        // Cria um novo cliente
         const schema = Yup.object().shape({
             name: Yup.string(),
             email: Yup.string().email(),
-            status: Yup.string().uppercase()
+            oldPassword: Yup.string().min(8),
+            password: Yup.string().min(8).when("oldPassword", (oldPassword, field) =>
+                oldPassword ? field.required() : field
+            ),
+            passwordConfirmation: Yup.string().when("password", (password, field) =>
+                password ? field.required().oneOf([Yup.ref("password")]) : field
+            )
         })
 
-        schema.isValid(req.body);
-
         if (!(await schema.isValid(req.body))) {
-            return res.status(400).json({ error: "error on validate schema" });
+            return res.status(400).json({ error: "error on validate schema" })
         }
 
-        const customer = await Customer.findByPk(req.params.id);
+        const user = await User.findByPk(req.params.id)
 
-        if (!customer) {
+        if (!user) {
             return res.status(404).json();
         }
-        await customer.update(req.body);
 
-        // Retorna o cliente alterado
-        return res.json(customer);
+        const { oldPassword } = req.body;
+
+        if (oldPassword && !(await user.checkPassword(oldPassword))) {
+            return res.status(401).json({ error: "user password not match!" });
+        }
+
+        const { id, name, email, createdAt, updatedAt } = await user.update(req.body);
+
+        return res.json({ id, name, email, createdAt, updatedAt });
     }
 
-    // Rota para deletar um cliente
     async destroy(req, res) {
+        const user = await User.findByPk(req.params.id)
 
-        const customer = await Customer.findByPk(req.params.id);
-        if (!customer) {
-            // Remove o cliente do banco de dados
+        if (!user) {
             return res.status(404).json();
         }
-        await customer.destroy();
+
+        await user.destroy();
+
         return res.json();
     }
+
 }
 
-// Exporta uma instância da classe CustomersController
-export default new CustomersController();
+export default new UsersController();

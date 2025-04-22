@@ -4,6 +4,7 @@ import { Router } from 'express';
 // Importa o controller CustomersController
 import customers from './app/controllers/CustomersController.js';
 import contacts from './app/controllers/ContactsController.js';
+import users from './app/controllers/UsersController.js';
 
 const routes = new Router();
 
@@ -19,5 +20,11 @@ routes.get("/customers/:customerId/contacts/:id", contacts.show);
 routes.post("/customers/:customerId/contacts/", contacts.create);
 routes.put("/customers/:customerId/contacts/:id", contacts.update);
 routes.delete("/customers/:customerId/contacts/:id", contacts.destroy);
+
+routes.get("/users/", users.index);
+routes.get("/users/:id", users.show);
+routes.post("/users/", users.create);
+routes.put("/users/:id", users.update);
+routes.delete("/users/:id", users.destroy);
 
 export default routes;
