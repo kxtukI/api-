@@ -2,6 +2,7 @@
 // O arquivo app.js é responsável por configurar o servidor express e adicionar os middlewares e rotas.
 import express  from 'express';
 import routes  from './routes.js';
+import authMiddleware from './app/middlewares/auth.js';
 
 import "./database/index.js";
 
@@ -17,6 +18,7 @@ class App {
 
     middlewares(){
         this.server.use(express.json());
+        this.server.use(authMiddleware);
     }
 
     routes(){
