@@ -117,23 +117,42 @@ class UsersController {
             return res.status(400).json({ error: "error on validate schema" })
         }
 
-        const { id, name, email, createdAt, updatedAt } = await User.create(req.body);
+        const { id, name, email, file_id, createdAt, updatedAt } = await User.create(req.body);
 
-        return res.json({ id, name, email, createdAt, updatedAt });
+        return res.json({ id, name, email, file_id, createdAt, updatedAt });
     }
 
     async update(req, res) {
+        console.log('BODY:', req.body);
+        console.log('TYPE:', typeof req.body.file_id, req.body.file_id);
+
         const schema = Yup.object().shape({
             name: Yup.string(),
             email: Yup.string().email(),
+            file_id: Yup.number()
+                .transform(value => (value === "" || value === null || value === undefined ? null : value))
+                .nullable()
+                .notRequired(),
             oldPassword: Yup.string().min(8),
-            password: Yup.string().min(8).when("oldPassword", (oldPassword, field) =>
-                oldPassword ? field.required() : field
-            ),
-            passwordConfirmation: Yup.string().when("password", (password, field) =>
-                password ? field.required().oneOf([Yup.ref("password")]) : field
-            )
-        })
+            password: Yup.string().min(8)
+                .when("oldPassword", {
+                    is: (val) => !!val,
+                    then: (schema) => schema.required(),
+                    otherwise: (schema) => schema.strip() // remove se não for enviado
+                }),
+            passwordConfirmation: Yup.string()
+                .when("oldPassword", {
+                    is: (val) => !!val,
+                    then: (schema) => schema.required().oneOf([Yup.ref("password")]),
+                    otherwise: (schema) => schema.strip()
+                })
+        });
+
+        try {
+            await schema.validate(req.body);
+        } catch (err) {
+            console.log('YUP ERROR:', err.errors);
+        }
 
         if (!(await schema.isValid(req.body))) {
             return res.status(400).json({ error: "error on validate schema" })
@@ -151,9 +170,9 @@ class UsersController {
             return res.status(401).json({ error: "user password not match!" });
         }
 
-        const { id, name, email, createdAt, updatedAt } = await user.update(req.body);
+        const { id, name, email, file_id, createdAt, updatedAt } = await user.update(req.body);
 
-        return res.json({ id, name, email, createdAt, updatedAt });
+        return res.json({ id, name, email, file_id, createdAt, updatedAt });
     }
 
     async destroy(req, res) {
