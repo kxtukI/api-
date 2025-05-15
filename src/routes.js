@@ -1,6 +1,9 @@
 // Descrição: Configuração do servidor express
 // O arquivo routes.js é responsável por configurar as rotas da aplicação.
 import { Router } from 'express';
+
+import auth from './app/middlewares/auth.js';
+
 // Importa o controller CustomersController
 import customers from './app/controllers/CustomersController.js';
 import contacts from './app/controllers/ContactsController.js';
@@ -10,6 +13,8 @@ import sessions from './app/controllers/SessionsController.js';
 const routes = new Router();
 
 routes.post("/sessions", sessions.create)
+
+routes.use(auth);
 
 // Adiciona as rotas para Customers
 routes.get("/customers", customers.index);
