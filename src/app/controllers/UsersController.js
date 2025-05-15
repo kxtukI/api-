@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
+import Mail from '../../lib/Mail.js';
 
 import User from '../models/User.js';
 
@@ -119,12 +120,18 @@ class UsersController {
 
         const { id, name, email, file_id, createdAt, updatedAt } = await User.create(req.body);
 
+        Mail.send({
+            to: email,
+            subject: "Bem-vindo(a)",
+            text: `Olá ${name} bem-vindo(a) ao sistema!`
+        }).catch(err => {
+            console.error('Erro ao enviar e-mail:', err);
+        });
+
         return res.json({ id, name, email, file_id, createdAt, updatedAt });
     }
 
     async update(req, res) {
-        console.log('BODY:', req.body);
-        console.log('TYPE:', typeof req.body.file_id, req.body.file_id);
 
         const schema = Yup.object().shape({
             name: Yup.string(),
@@ -147,12 +154,6 @@ class UsersController {
                     otherwise: (schema) => schema.strip()
                 })
         });
-
-        try {
-            await schema.validate(req.body);
-        } catch (err) {
-            console.log('YUP ERROR:', err.errors);
-        }
 
         if (!(await schema.isValid(req.body))) {
             return res.status(400).json({ error: "error on validate schema" })
