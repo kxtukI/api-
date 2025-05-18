@@ -1,10 +1,9 @@
 import { Op } from 'sequelize';
 import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
-import Mail from '../../lib/Mail.js';
 
 import Queue from '../../lib/Queue.js';
-import DummyJob from '../jobs/DummyJob.js';
+import WelcomeEmailJob from '../jobs/WelcomeEmailJob.js';
 
 import User from '../models/User.js';
 
@@ -123,15 +122,7 @@ class UsersController {
 
         const { id, name, email, file_id, createdAt, updatedAt } = await User.create(req.body);
 
-        Mail.send({
-            to: email,
-            subject: "Bem-vindo(a)",
-            text: `Olá ${name} bem-vindo(a) ao sistema!`
-        }).catch(err => {
-            console.error('Erro ao enviar e-mail:', err);
-        });
-
-        await Queue.add(DummyJob.key, { message: "Hello"})
+        await Queue.add(WelcomeEmailJob.key, { email, name })
 
         return res.json({ id, name, email, file_id, createdAt, updatedAt });
     }
