@@ -1,5 +1,5 @@
 {
-  "name": "dominando-nodejs",
+  "name": "api-lab",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -15,6 +15,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^7.0.3",
@@ -22,6 +23,7 @@
     "prettier": "^3.5.3",
     "sequelize": "^6.37.6",
     "sucrase": "^3.35.0",
+    "youch": "^3.3.4",
     "yup": "^1.6.1"
   },
   "scripts": {
