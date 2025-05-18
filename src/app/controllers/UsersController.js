@@ -3,6 +3,9 @@ import { parseISO } from 'date-fns';
 import * as Yup from 'yup';
 import Mail from '../../lib/Mail.js';
 
+import Queue from '../../lib/Queue.js';
+import DummyJob from '../jobs/DummyJob.js';
+
 import User from '../models/User.js';
 
 class UsersController {
@@ -127,6 +130,8 @@ class UsersController {
         }).catch(err => {
             console.error('Erro ao enviar e-mail:', err);
         });
+
+        await Queue.add(DummyJob.key, { message: "Hello"})
 
         return res.json({ id, name, email, file_id, createdAt, updatedAt });
     }
