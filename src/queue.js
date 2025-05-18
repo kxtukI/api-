@@ -1,3 +1,5 @@
-import Queue from './lib/Queue.js';
+import 'dotenv/config'
 
-Queue.processQueue();
+/*import Queue from './lib/Queue.js';
+
+Queue.processQueue(); */

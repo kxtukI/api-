@@ -1,5 +1,6 @@
 // Descrição: Configuração do servidor express
 // O arquivo app.js é responsável por configurar o servidor express e adicionar os middlewares e rotas.
+import 'dotenv/config'
 import express  from 'express';
 import routes  from './routes.js';
 

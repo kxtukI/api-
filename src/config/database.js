@@ -1,9 +1,11 @@
+import 'dotenv/config'
+
 export default {
-  database: 'project',
-  username: 'root',
-  password: null,
-  host: '127.0.0.1',
-  dialect: 'mysql',
+  database: process.env.DB_NAME,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  dialect: process.env.DB_DIALECT,
   define: {
     timestamps: true,
   },

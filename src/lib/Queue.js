@@ -1,4 +1,4 @@
-import Bee from 'bee-queue';
+/*import Bee from 'bee-queue';
 import redisConfig from '../config/redis.js';
 
 import DummyJob from '../app/jobs/DummyJob.js';
@@ -37,8 +37,11 @@ class Queue {
     }
 
     handleFailure(job, err) {
+        if(process.env.NODE_ENV === 'development'){}
         console.error(`Queue ${job.queue.name}: FAILED `, err)
+}
     }
 }
 
-export default new Queue();
+export default new Queue(); 
+*/
